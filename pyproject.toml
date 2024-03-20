@@ -5,11 +5,18 @@ build-backend = "hatchling.build"
 [project]
 name = "hatch-gettext"
 dynamic = ["version"]
-description = ''
+description = 'Hatch build hook plugin for GNU gettext'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "GPL-3.0-or-later"
-keywords = []
+keywords = [
+  "build",
+  "hatch",
+  "gettext",
+  "i18n",
+  "plugin",
+  "typing",
+]
 authors = [
   { name = "Damon Lynch", email = "damonlynch@gmail.com" },
 ]
