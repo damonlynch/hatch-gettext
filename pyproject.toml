@@ -32,4 +32,4 @@ Issues = "https://github.com/damonlynch/hatch-gettext/issues"
 Source = "https://github.com/damonlynch/hatch-gettext"
 
 [tool.hatch.version]
-path = "src/hatch_gettext/__about__.py"
+path = "hatch_gettext/__about__.py"
