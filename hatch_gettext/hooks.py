@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from hatchling.plugin import hookimpl
-
 from hatch_gettext.plugin import GettextBuildHook
 
 
