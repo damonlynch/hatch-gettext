@@ -35,7 +35,7 @@ dependencies = []
 [project.urls]
 Documentation = "https://github.com/damonlynch/hatch-gettext#readme"
 Issues = "https://github.com/damonlynch/hatch-gettext/issues"
-Source = "https://github.com/damonlynch/hatch-gettext"
+Homepage = "https://github.com/damonlynch/hatch-gettext"
 
 [project.entry-points.hatch]
 gettext = "hatch_gettext.hooks"
