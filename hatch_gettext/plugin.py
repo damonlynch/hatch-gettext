@@ -6,7 +6,6 @@ import platform
 import shlex
 import shutil
 import subprocess
-
 from pathlib import Path
 from typing import Any
 

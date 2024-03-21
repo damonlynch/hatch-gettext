@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "hatch-gettext"
 dynamic = ["version"]
-description = 'Hatch build hook plugin for GNU gettext'
+description = "Hatch build hook plugin for GNU gettext"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "GPL-3.0-or-later"
