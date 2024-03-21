@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import functools
-import platform
 import shlex
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -34,7 +34,7 @@ class GettextBuildHook(BuildHookInterface):
 
     @staticmethod
     def _assemble_command(cmd: str) -> list[str] | str:
-        if platform.system() == "Windows":
+        if sys.platform == 'win32':
             return cmd
         return shlex.split(cmd)
 
@@ -72,7 +72,7 @@ class GettextBuildHook(BuildHookInterface):
             raise Exception(f"Error while invoking intltool-merge:\n{process.stdout}")
 
     def _clean_files(self, relative_file_paths: list[str]) -> None:
-        project_root = Path(self.root)
+        project_root: Path = Path(self.root)
         for p in relative_file_paths:
             full_path = project_root / p
             if full_path.exists():
@@ -213,7 +213,7 @@ class GettextBuildHook(BuildHookInterface):
         if self._gtb_files is None:
             return []
 
-        project_root = Path(self.root)
+        project_root: Path = Path(self.root)
         files_to_build = []
         for folder, files in self._gtb_files.items():
             for in_file in files:
@@ -244,7 +244,7 @@ class GettextBuildHook(BuildHookInterface):
         Compile .po files into .mo files using msgfmt
         """
 
-        project_root = Path(self.root)
+        project_root: Path = Path(self.root)
 
         for po_file, m in self.po_mo_pairs():
             print(f'Compiling "{po_file.name}"')
@@ -257,12 +257,12 @@ class GettextBuildHook(BuildHookInterface):
         Translate .desktop and .xml files using intltool-merge
         """
 
-        project_root = Path(self.root)
+        project_root: Path = Path(self.root)
         for in_file, to_translate in self.translate_file_pairs():
-            to_translate = project_root / to_translate
-            to_translate.parent.mkdir(parents=True, exist_ok=True)
-            print(f'Translating "{to_translate.stem}"')
-            self._translate_file(self._po_dir, in_file, to_translate)
+            path_to_translate = project_root / to_translate
+            path_to_translate.parent.mkdir(parents=True, exist_ok=True)
+            print(f'Translating "{path_to_translate.stem}"')
+            self._translate_file(self._po_dir, in_file, path_to_translate)
 
     def initialize(self, version: str, build_data: dict[str, Any]) -> None:
         if self.target_name not in ["wheel", "sdist"]:
