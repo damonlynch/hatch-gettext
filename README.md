@@ -7,6 +7,7 @@
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/damonlynch?logo=GitHub%20Sponsors&style=social)](https://github.com/sponsors/damonlynch)
 [![PyPI - Version](https://img.shields.io/pypi/v/hatch-gettext.svg)](https://pypi.org/project/hatch-gettext)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hatch-gettext.svg)](https://pypi.org/project/hatch-gettext)
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 -----
 
 This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-hooks) plugin 
