@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
+from rich.console import Console
 
 
 class GettextBuildHook(BuildHookInterface):
@@ -34,7 +35,7 @@ class GettextBuildHook(BuildHookInterface):
 
     @staticmethod
     def _assemble_command(cmd: str) -> list[str] | str:
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             return cmd
         return shlex.split(cmd)
 
@@ -76,7 +77,9 @@ class GettextBuildHook(BuildHookInterface):
         for p in relative_file_paths:
             full_path = project_root / p
             if full_path.exists():
-                print(f"Removing {full_path}")
+                self.console_output(
+                    f"Removing {full_path}", level=2, style=self._style_level_debug
+                )
                 full_path.unlink()
 
     def _has_only_subdirectories(self, path: Path) -> bool:
@@ -106,7 +109,9 @@ class GettextBuildHook(BuildHookInterface):
         """
 
         if folder.is_dir() and self._has_only_subdirectories(folder):
-            print(f"Removing {folder}")
+            self.console_output(
+                f"Removing {folder}", level=2, style=self._style_level_debug
+            )
             shutil.rmtree(folder)
 
     def clean(self, versions: list[str]) -> None:
@@ -118,6 +123,11 @@ class GettextBuildHook(BuildHookInterface):
 
         :param versions: see Hatch documentation for details
         """
+
+        self.setup_console()
+        self.console_output(
+            "Cleaning gettext translations", level=1, style=self._style_level_waiting
+        )
 
         self.load_gettextbuild_config()
 
@@ -135,6 +145,11 @@ class GettextBuildHook(BuildHookInterface):
             translated_subfolders = filter(lambda p: p != project_root, folders)
             for folder in translated_subfolders:
                 self._clean_directory_tree_only_if_has_empty_subdirectories(folder)
+        self.console_output(
+            "Finished cleaning gettext translations",
+            level=1,
+            style=self._style_level_success,
+        )
 
     def load_gettextbuild_config(self) -> None:
         """
@@ -247,7 +262,7 @@ class GettextBuildHook(BuildHookInterface):
         project_root: Path = Path(self.root)
 
         for po_file, m in self.po_mo_pairs():
-            print(f'Compiling "{po_file.name}"')
+            self.console_output(f'Compiling "{po_file.name}"', level=2)
             mo_file = project_root / m
             mo_file.parent.mkdir(parents=True, exist_ok=True)
             self._compile_po_to_mo(po_file, mo_file)
@@ -261,13 +276,10 @@ class GettextBuildHook(BuildHookInterface):
         for in_file, to_translate in self.translate_file_pairs():
             path_to_translate = project_root / to_translate
             path_to_translate.parent.mkdir(parents=True, exist_ok=True)
-            print(f'Translating "{path_to_translate.stem}"')
+            self.console_output(f'Translating "{path_to_translate.stem}"', level=2)
             self._translate_file(self._po_dir, in_file, path_to_translate)
 
-    def initialize(self, version: str, build_data: dict[str, Any]) -> None:
-        if self.target_name not in ["wheel", "sdist"]:
-            return
-
+    def do_work(self, build_data: dict[str, Any]) -> None:
         self.load_gettextbuild_config()
 
         build_data["artifacts"].extend(self.mo_files_to_build)
@@ -276,3 +288,36 @@ class GettextBuildHook(BuildHookInterface):
         if self._gtb_files:
             build_data["artifacts"].extend(self.translate_files_to_build)
             self.translate_files()
+
+    def setup_console(self) -> None:
+        if self.app.verbosity < 0:
+            return
+        self.console = Console(force_terminal=True, force_interactive=False)
+
+        # Match default Hatch color config:
+        self._style_level_success = "bold cyan"
+        self._style_level_error = "bold red"
+        self._style_level_warning = "bold yellow"
+        self._style_level_waiting = "bold magenta"
+        self._style_level_info = "bold"
+        self._style_level_debug = "bold"
+
+    def console_output(self, message: str, level: int = 0, style: str = "") -> None:
+        if self.app.verbosity < level:
+            return
+        self.console.print(message, style=style)
+
+    def initialize(self, version: str, build_data: dict[str, Any]) -> None:
+        if self.target_name not in ["wheel", "sdist"]:
+            return
+
+        self.setup_console()
+        self.console_output(
+            "Building gettext translations", level=1, style=self._style_level_waiting
+        )
+        self.do_work(build_data)
+        self.console_output(
+            "Finished building gettext translations",
+            level=1,
+            style=self._style_level_success,
+        )

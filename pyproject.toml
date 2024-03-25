@@ -30,7 +30,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = ["rich", ]
 
 [project.urls]
 Documentation = "https://github.com/damonlynch/hatch-gettext#readme"
