@@ -157,22 +157,22 @@ class GettextBuildHook(BuildHookInterface):
         and assign the values to private class variables.
         """
 
-        self._i18n_name = self.config.get("i18n_name") or self.metadata.name
+        self._i18n_name = self.config.get("i18n-name") or self.metadata.name
 
         project_root = Path(self.root)
 
-        self._po_dir = project_root / (self.config.get("po_directory") or "po")
+        self._po_dir = project_root / (self.config.get("po-directory") or "po")
         if not self._po_dir.is_dir():
             raise ValueError(
-                f'Configure "po_directory" in "{self.config_name()}" in pyproject.toml '
+                f'Configure "po-directory" in "{self.config_name()}" in pyproject.toml '
                 'to the project\'s po directory [default: "po"], and ensure the '
                 "directory exists."
             )
         try:
-            self._locale_dir = project_root / self.config["locale_directory"]
+            self._locale_dir = project_root / self.config["locale-directory"]
         except KeyError:
             raise ValueError(
-                f'Configure "locale_directory" in "{self.config_name()}" in '
+                f'Configure "locale-directory" in "{self.config_name()}" in '
                 "pyproject.toml to the directory in which compiled mo files will be "
                 "written to."
             )
@@ -206,7 +206,7 @@ class GettextBuildHook(BuildHookInterface):
             (
                 Path(po_file),
                 str(
-                    Path(self.config["locale_directory"])
+                    Path(self.config["locale-directory"])
                     / po_file.stem
                     / "LC_MESSAGES"
                     / f"{self._i18n_name}.mo"

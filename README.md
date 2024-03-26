@@ -50,7 +50,7 @@ For example, for a project named `myproject`, and a src layout
 
 ```toml
 [tool.hatch.build.hooks.gettext]
-locale_directory = "src/myproject/locale"
+locale-directory = "src/myproject/locale"
 ```
 
 Optionally, specify values for the gexttext output name
@@ -58,13 +58,13 @@ and the source directory where po files are found:
 
 ```toml
 [tool.hatch.build.hooks.gettext]
-locale_directory = "src/myproject/locale"
-i18n_name = "myproject" 
-po_directory = "po-files"
+locale-directory = "src/myproject/locale"
+i18n-name = "myproject" 
+po-directory = "po-files"
 ```
 
-If `i18n_name` is not specified, the `name` in `[project]` in the 
-`pyproject.toml` is used. If `po_directory` is not specified, the 
+If `i18n-name` is not specified, the `name` in `[project]` in the 
+`pyproject.toml` is used. If `po-directory` is not specified, the 
 directory `po` is used.
 
 ### Translating files using intltool-merge
