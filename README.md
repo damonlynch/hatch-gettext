@@ -89,6 +89,11 @@ The plugin includes logic to remove the files it outputs using hatch's
 will also be removed, as long as these directories do not contain files 
 created by something other than this plugin.
 
+## Related Hatch plugin
+
+To automatically generate a manual page from an `ArgumentParser` object,
+see [hatch-argparse-manpage](https://github.com/damonlynch/hatch-argparse-manpage).
+
 ## License
 
 `hatch-gettext` is distributed under the terms of the [GPL-3.0-or-later](https://spdx.org/licenses/GPL-3.0-or-later.html) license.
