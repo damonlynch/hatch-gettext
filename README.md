@@ -10,9 +10,11 @@
 
 This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-hooks) plugin 
 for [Hatch](https://github.com/pypa/hatch) that compiles multi-lingual messages with GNU 
-gettext's tools `msgfmt`; it can also (optionally) translate .xml and 
-.desktop files, search for left out files, and regenerate the .pot template 
-using `intltool`.
+gettext's tools `msgfmt`. It can also (optionally) use`intltool` to: 
+- translate .xml and .desktop files
+- search for left out files
+- regenerate the .pot template 
+- display a status report for all translations
 
 **Table of Contents**
 
@@ -23,6 +25,7 @@ using `intltool`.
     * [Compiling messages with msgfmt](#compiling-messages-with-msgfmt)
     * [Identifying left out files using intltool-update](#identifying-left-out-files-using-intltool-update)
     * [Regenerating the .pot template using intltool-update](#regenerating-the-pot-template-using-intltool-update)
+    * [Displaying a status report using intltool-update](#displaying-a-status-report-using-intltool-update)
     * [Translating files using intltool-merge](#translating-files-using-intltool-merge)
   * [Cleaning output files](#cleaning-output-files)
   * [Related Hatch plugin](#related-hatch-plugin)
@@ -49,7 +52,8 @@ build-backend = "hatchling.build"
 This plugin requires `.mo` files be created; it also requires that the 
 directory storing them is within the project's base directory, and is not 
 equal to the project's base directory or the directory in which `po` files
-are sourced.  
+are sourced. The mo file directory is set using `locale-directory`, which is 
+required. 
 
 For example, for a project named `myproject`, and a src layout 
 `src/myproject`, an acceptable directory in which to store the 
@@ -95,6 +99,17 @@ To regenerate the .pot template with every sdist build, set
 [tool.hatch.build.hooks.gettext]
 locale-directory = "src/myproject/locale"
 regenerate-template = true
+```
+
+### Displaying a status report using intltool-update
+
+To display a status report for all translations, set `show-report` to true 
+(the default value is false):
+
+```toml
+[tool.hatch.build.hooks.gettext]
+locale-directory = "src/myproject/locale"
+show-report = true
 ```
 
 ### Translating files using intltool-merge

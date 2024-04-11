@@ -161,6 +161,7 @@ class GettextBuildHook(BuildHookInterface):
         self._i18n_name: str = self.config.get("i18n-name") or self.metadata.name
         self._identify_left_out: bool = self.config.get("identify-left-out", False)
         self._regenerate_template: bool = self.config.get("regenerate-template", False)
+        self._show_report: bool = self.config.get("show-report", False)
 
         project_root = Path(self.root)
 
@@ -320,6 +321,11 @@ class GettextBuildHook(BuildHookInterface):
         )
         subprocess.run(cmd, check=True, cwd=self._po_dir)
 
+    def show_report(self) -> None:
+        cmd = self._assemble_command(f"intltool-update -r -g {self._i18n_name}")
+        self.console_output("Generating report", level=2, style=self._style_level_debug)
+        subprocess.run(cmd, check=True, cwd=self._po_dir)
+
     def do_work(self, build_data: dict[str, Any]) -> None:
         self.load_gettextbuild_config()
 
@@ -328,6 +334,8 @@ class GettextBuildHook(BuildHookInterface):
                 self.identify_left_out()
             if self._regenerate_template:
                 self.regenerate_template()
+            if self._show_report:
+                self.show_report()
 
         build_data["artifacts"].extend(self.mo_files_to_build)
         self.compile_mo_files()
