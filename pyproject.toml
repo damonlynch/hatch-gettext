@@ -21,7 +21,7 @@ authors = [
   { name = "Damon Lynch", email = "damonlynch@gmail.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Framework :: Hatch",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
@@ -29,6 +29,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
+  "Typing :: Typed",
 ]
 dependencies = ["rich", ]
 
@@ -42,3 +43,17 @@ gettext = "hatch_gettext.hooks"
 
 [tool.hatch.version]
 path = "hatch_gettext/__about__.py"
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
