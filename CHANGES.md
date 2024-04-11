@@ -1,6 +1,14 @@
 Changelog for Hatch Gettext
 ===========================
 
+1.0.0 (2024-04-xx)
+------------------
+
+ - Add options to use `intltool` to regenerate the .pot template and check for 
+   left out files.
+ - If LINGUAS file or environment variable is specified, only generate mo files
+   for languages it specifies.
+
 0.6.0 (2024-03-27)
 ------------------
 

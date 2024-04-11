@@ -10,17 +10,24 @@
 
 This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-hooks) plugin 
 for [Hatch](https://github.com/pypa/hatch) that compiles multi-lingual messages with GNU 
-gettext's tools `msgfmt` and (optionally) translates files using 
-gettext's `intltool-merge`.
+gettext's tools `msgfmt`; it can also (optionally) translate .xml and 
+.desktop files, search for left out files, and regenerate the .pot template 
+using `intltool`.
 
 **Table of Contents**
 
-- [Configuration](#configuration)
-  - [Calling the plugin](#calling-the-plugin)
-  - [Compiling messages with msgfmt](#compiling-messages-with-msgfmt)
-  - [Translating files using intltool-merge](#translating-files-using-intltool-merge)
-- [Cleaning output files](#cleaning-output-files)
-- [License](#license)
+<!-- TOC -->
+* [Hatch Gettext](#hatch-gettext)
+  * [Configuration](#configuration)
+    * [Calling the plugin](#calling-the-plugin)
+    * [Compiling messages with msgfmt](#compiling-messages-with-msgfmt)
+    * [Identifying left out files using intltool-update](#identifying-left-out-files-using-intltool-update)
+    * [Regenerating the .pot template using intltool-update](#regenerating-the-pot-template-using-intltool-update)
+    * [Translating files using intltool-merge](#translating-files-using-intltool-merge)
+  * [Cleaning output files](#cleaning-output-files)
+  * [Related Hatch plugin](#related-hatch-plugin)
+  * [License](#license)
+<!-- TOC -->
 
 ## Configuration
 
@@ -66,6 +73,29 @@ po-directory = "po-files"
 If `i18n-name` is not specified, the `name` in `[project]` in the 
 `pyproject.toml` is used. If `po-directory` is not specified, the 
 directory `po` is used.
+
+### Identifying left out files using intltool-update
+
+With every source distribution (sdist) build, to search for left out files, 
+which should have been listed in `POTFILES.in` or `POTFILES.skip`, set 
+`identify-left-out` to true (the default value is false):
+
+```toml
+[tool.hatch.build.hooks.gettext]
+locale-directory = "src/myproject/locale"
+identify-left-out = true
+```
+
+### Regenerating the .pot template using intltool-update
+
+To regenerate the .pot template with every sdist build, set 
+`regenerate-template` to true (the default value is false):
+
+```toml
+[tool.hatch.build.hooks.gettext]
+locale-directory = "src/myproject/locale"
+regenerate-template = true
+```
 
 ### Translating files using intltool-merge
 

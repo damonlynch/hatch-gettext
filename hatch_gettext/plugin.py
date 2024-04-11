@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import functools
+import os
 import shlex
 import shutil
 import subprocess
@@ -157,11 +158,13 @@ class GettextBuildHook(BuildHookInterface):
         and assign the values to private class variables.
         """
 
-        self._i18n_name = self.config.get("i18n-name") or self.metadata.name
+        self._i18n_name: str = self.config.get("i18n-name") or self.metadata.name
+        self._identify_left_out: bool = self.config.get("identify-left-out", False)
+        self._regenerate_template: bool = self.config.get("regenerate-template", False)
 
         project_root = Path(self.root)
 
-        self._po_dir = project_root / (self.config.get("po-directory") or "po")
+        self._po_dir = project_root / (self.config.get("po-directory", "po"))
         if not self._po_dir.is_dir():
             raise ValueError(
                 f'Configure "po-directory" in "{self.config_name()}" in pyproject.toml '
@@ -200,7 +203,25 @@ class GettextBuildHook(BuildHookInterface):
 
          Each po file will be a full Path, but the mo files' path will be a string
          whose path is relative to the project root.
+
+         If a LINGUAS file is found in the po directory or as an environment variable,
+         only specified po files will be included.
         """
+
+        filter_languages: list[str] = []
+        linguas_file = self._po_dir / "LINGUAS"
+        if linguas_file.is_file():
+            with open(linguas_file) as f:
+                filter_languages = f.read().split()
+        if "LINGUAS" in os.environ:
+            filter_languages = os.environ["LINGUAS"].split()
+
+        po_files = self._po_dir.glob("*.po")
+        if filter_languages:
+            po_files = (p for p in po_files if p.stem in filter_languages)
+
+        po_files = list(po_files)
+        po_files.sort()
 
         return [
             (
@@ -212,7 +233,7 @@ class GettextBuildHook(BuildHookInterface):
                     / f"{self._i18n_name}.mo"
                 ),
             )
-            for po_file in self._po_dir.glob("*.po")
+            for po_file in po_files
         ]
 
     @functools.cache
@@ -279,8 +300,34 @@ class GettextBuildHook(BuildHookInterface):
             self.console_output(f'Translating "{path_to_translate.stem}"', level=2)
             self._translate_file(self._po_dir, in_file, path_to_translate)
 
+    def identify_left_out(self) -> None:
+        cmd = self._assemble_command("intltool-update -m")
+        p = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            cwd=self._po_dir,
+        )
+        if p.stdout:
+            self.console_output(p.stdout, level=0, style=self._style_level_error)
+            raise ValueError("Files missing from translation template")
+
+    def regenerate_template(self) -> None:
+        cmd = self._assemble_command(f"intltool-update -p -g {self._i18n_name}")
+        self.console_output(
+            "Regenerating .pot template", level=2, style=self._style_level_debug
+        )
+        subprocess.run(cmd, check=True, cwd=self._po_dir)
+
     def do_work(self, build_data: dict[str, Any]) -> None:
         self.load_gettextbuild_config()
+
+        if self.target_name == "sdist":
+            if self._identify_left_out:
+                self.identify_left_out()
+            if self._regenerate_template:
+                self.regenerate_template()
 
         build_data["artifacts"].extend(self.mo_files_to_build)
         self.compile_mo_files()
