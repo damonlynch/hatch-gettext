@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import functools
+import os
 import shlex
 import shutil
 import subprocess
@@ -202,7 +203,25 @@ class GettextBuildHook(BuildHookInterface):
 
          Each po file will be a full Path, but the mo files' path will be a string
          whose path is relative to the project root.
+
+         If a LINGUAS file is found in the po directory or as an environment variable,
+         only specified po files will be included.
         """
+
+        filter_languages: list[str] = []
+        linguas_file = self._po_dir / "LINGUAS"
+        if linguas_file.is_file():
+            with open(linguas_file) as f:
+                filter_languages = f.read().split()
+        if "LINGUAS" in os.environ:
+            filter_languages = os.environ["LINGUAS"].split()
+
+        po_files = self._po_dir.glob("*.po")
+        if filter_languages:
+            po_files = (p for p in po_files if p.stem in filter_languages)
+
+        po_files = list(po_files)
+        po_files.sort()
 
         return [
             (
@@ -214,7 +233,7 @@ class GettextBuildHook(BuildHookInterface):
                     / f"{self._i18n_name}.mo"
                 ),
             )
-            for po_file in self._po_dir.glob("*.po")
+            for po_file in po_files
         ]
 
     @functools.cache
