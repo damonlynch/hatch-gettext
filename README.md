@@ -10,7 +10,7 @@
 
 This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-hooks) plugin 
 for [Hatch](https://github.com/pypa/hatch) that compiles multi-lingual messages with GNU 
-gettext's tools `msgfmt`. It can also (optionally) use`intltool` to: 
+gettext's tools `msgfmt`. It can also (optionally) use `intltool` to: 
 - translate .xml and .desktop files
 - search for left out files
 - regenerate the .pot template 
