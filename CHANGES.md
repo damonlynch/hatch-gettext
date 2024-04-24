@@ -1,6 +1,12 @@
 Changelog for Hatch Gettext
 ===========================
 
+1.1.0 (2024-04-24)
+------------------
+
+ - Add manpage markdown source file in `docs` directory, to be generated with 
+   `pandoc`.
+
 1.0.0 (2024-04-12)
 ------------------
 
