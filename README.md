@@ -117,8 +117,8 @@ show-report = true
 This plugin allows for but does not mandate translating `.xml` and 
 `.desktop` files using `intltool-merge`. Using 
 `[tool.hatch.build.hooks.gettext.files]`, specify the destination directories
-for the translated files on the left, and arrays of source files on the 
-right. For example:  
+for the translated files using keys, and arrays of source files as values. For 
+example:  
 
 ```toml
 [tool.hatch.build.hooks.gettext.files]
