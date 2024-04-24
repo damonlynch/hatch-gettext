@@ -14,9 +14,9 @@ requires = ["hatchling", "hatch-gettext"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.hooks.gettext]
-locale-directory = "RELATIVE DIRECTORY"
+locale-directory = "RELATIVE MO FILE DIRECTORY"
 i18n-name = "GETTEXT OUTPUT NAME"
-po-directory = "RELATIVE PO DIRECTORY"
+po-directory = "RELATIVE PO FILE DIRECTORY"
 identify-left-out = BOOLEAN
 regenerate-template = BOOLEAN
 show-report = BOOLEAN
@@ -27,17 +27,18 @@ show-report = BOOLEAN
 
 # DESCRIPTION
 
-**hatch-gettext** provides a build hook plugin for Hatch that compiles multi-lingual messages with GNU gettext's tools msgfmt. It can also (optionally) use intltool to:
+**Hatch-gettext** provides a build hook plugin for Hatch that compiles multi-lingual messages with GNU gettext's tools _msgfmt_.
+It can also (optionally) use _intltool_ to:
 
 - search for left out files
 - regenerate the .pot template 
 - display a status report for all translations
 - translate .xml and .desktop files
 
-This plugin requires _.mo_ files be created; it also requires that the 
-directory storing them is within the project's base directory, and is not 
-equal to the project's base directory or the directory in which _po_ files
-are sourced.
+## Directory layout
+This plugin requires that the directory storing generated _mo_ files is within the 
+project's base directory, and is not equal to the project's base directory or the 
+directory in which _po_ files are sourced.
 
 For example, for a project named _myproject_, and a src layout 
 _src/myproject_, an acceptable directory in which to store the 
@@ -78,6 +79,14 @@ This plugin allows for but does not mandate translating _.xml_ and
 _.desktop_ files using _intltool-merge_. Using 
 _\[tool.hatch.build.hooks.gettext.files]_ in _pyproject.toml_, specify the destination directories
 for the translated files using keys, and arrays of source files as values. 
+
+
+## Cleaning output files
+
+The plugin includes logic to remove the files it outputs using hatch's
+`clean` hook. As well as individual files, any output directories created 
+will also be removed, as long as these directories do not contain files 
+created by something other than this plugin.
 
 # EXAMPLES
 
