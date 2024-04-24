@@ -22,7 +22,7 @@ regenerate-template = BOOLEAN
 show-report = BOOLEAN
 
 [tool.hatch.build.hooks.gettext.files]
-"RELATIVE DIRECTORY" = ["RELATIVE FILE PATH", ]
+"RELATIVE DIRECTORY" = ["RELATIVE FILE PATH", ...]
 ```
 
 # DESCRIPTION
