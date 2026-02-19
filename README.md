@@ -34,8 +34,7 @@ gettext's tools `msgfmt`. It can also (optionally) use `intltool` to:
 
 ## Configuration
 
-The [build hook plugin](https://hatch.pypa.io/latest/plugins/build-hook/) 
-name is `gettext`.
+The [build hook plugin](https://hatch.pypa.io/latest/plugins/build-hook/) name is `gettext`.
 
 ### Calling the plugin
 
@@ -48,24 +47,17 @@ build-backend = "hatchling.build"
 ```
 
 ### Compiling messages with msgfmt
- 
-This plugin requires `.mo` files be created; it also requires that the 
-directory storing them is within the project's base directory, and is not 
-equal to the project's base directory or the directory in which `po` files
-are sourced. The mo file directory is set using `locale-directory`, which is 
-required. 
 
-For example, for a project named `myproject`, and a src layout 
-`src/myproject`, an acceptable directory in which to store the 
-`LC_MESSAGES/myproject.mo` files would be `src/myproject/locale`
+This plugin requires `.mo` files be created; it also requires that the directory storing them is within the project's base directory, and is not equal to the project's base directory or the directory in which `po` files are sourced. The mo file directory is set using `locale-directory`, which is required.
+
+For example, for a project named `myproject`, and a src layout `src/myproject`, an acceptable directory in which to store the `LC_MESSAGES/myproject.mo` files would be `src/myproject/locale`
 
 ```toml
 [tool.hatch.build.hooks.gettext]
 locale-directory = "src/myproject/locale"
 ```
 
-Optionally, specify values for the gexttext output name
-and the source directory where po files are found:
+Optionally, specify values for the gexttext output name and the source directory where po files are found:
 
 ```toml
 [tool.hatch.build.hooks.gettext]
@@ -74,15 +66,11 @@ i18n-name = "myproject"
 po-directory = "po-files"
 ```
 
-If `i18n-name` is not specified, the `name` in `[project]` in the 
-`pyproject.toml` is used. If `po-directory` is not specified, the 
-directory `po` is used.
+If `i18n-name` is not specified, the `name` in `[project]` in the `pyproject.toml` is used. If `po-directory` is not specified, the directory `po` is used.
 
 ### Identifying left out files using intltool-update
 
-With every source distribution (sdist) build, to search for left out files, 
-which should have been listed in `POTFILES.in` or `POTFILES.skip`, set 
-`identify-left-out` to true (the default value is false):
+With every source distribution (sdist) build, to search for left out files, which should have been listed in `POTFILES.in` or `POTFILES.skip`, set `identify-left-out` to true (the default value is false):
 
 ```toml
 [tool.hatch.build.hooks.gettext]
@@ -92,8 +80,7 @@ identify-left-out = true
 
 ### Regenerating the .pot template using intltool-update
 
-To regenerate the .pot template with every sdist build, set 
-`regenerate-template` to true (the default value is false):
+To regenerate the .pot template with every sdist build, set `regenerate-template` to true (the default value is false):
 
 ```toml
 [tool.hatch.build.hooks.gettext]
@@ -103,8 +90,7 @@ regenerate-template = true
 
 ### Displaying a status report using intltool-update
 
-To display a status report for all translations, set `show-report` to true 
-(the default value is false):
+To display a status report for all translations, set `show-report` to true (the default value is false):
 
 ```toml
 [tool.hatch.build.hooks.gettext]
@@ -114,11 +100,7 @@ show-report = true
 
 ### Translating files using intltool-merge
 
-This plugin allows for but does not mandate translating `.xml` and 
-`.desktop` files using `intltool-merge`. Using 
-`[tool.hatch.build.hooks.gettext.files]`, specify the destination directories
-for the translated files using keys, and arrays of source files as values. For 
-example:  
+This plugin allows for but does not mandate translating `.xml` and `.desktop` files using `intltool-merge`. Using `[tool.hatch.build.hooks.gettext.files]`, specify the destination directories for the translated files using keys, and arrays of source files as values. For example:
 
 ```toml
 [tool.hatch.build.hooks.gettext.files]
@@ -129,15 +111,11 @@ example:
 
 ## Cleaning output files
 
-The plugin includes logic to remove the files it outputs using hatch's
-`clean` hook. As well as individual files, any output directories created 
-will also be removed, as long as these directories do not contain files 
-created by something other than this plugin.
+The plugin includes logic to remove the files it outputs using hatch's `clean` hook. As well as individual files, any output directories created will also be removed, as long as these directories do not contain files created by something other than this plugin.
 
 ## Related Hatch plugin
 
-To automatically generate a manual page from an `ArgumentParser` object,
-see [hatch-argparse-manpage](https://github.com/damonlynch/hatch-argparse-manpage).
+To automatically generate a manual page from an `ArgumentParser` object, see [hatch-argparse-manpage](https://github.com/damonlynch/hatch-argparse-manpage).
 
 ## License
 
