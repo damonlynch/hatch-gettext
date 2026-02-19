@@ -2,7 +2,7 @@
 
 ## 1.1.1 (2026-02-19)
 
--  Don't crash when doing quiet hatch build 
+- Don't crash when doing quiet hatch build 
 
 ## 1.1.0 (2024-04-24)
 
