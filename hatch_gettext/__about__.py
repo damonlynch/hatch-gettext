@@ -1,3 +1,3 @@
-# SPDX-FileCopyrightText: Copyright 2024 Damon Lynch <damonlynch@gmail.com>
-# SPDX-License-Identifier: GPL-3.0-or-later
-__version__ = "1.1.0"
+#  SPDX-FileCopyrightText: 2024-2026 Damon Lynch <damonlynch@gmail.com>
+#  SPDX-License-Identifier: GPL-3.0-or-later
+__version__ = "1.1.1"
