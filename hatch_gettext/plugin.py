@@ -345,8 +345,6 @@ class GettextBuildHook(BuildHookInterface):
             self.translate_files()
 
     def setup_console(self) -> None:
-        if self.app.verbosity < 0:
-            return
         self.console = Console(force_terminal=True, force_interactive=False)
 
         # Match default Hatch color config:
