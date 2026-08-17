@@ -44,6 +44,15 @@ requires = ["hatchling", "hatch-gettext"]
 build-backend = "hatchling.build"
 ```
 
+### Skipping Platforms
+
+This plugin may make less sense some platforms, e.g. Windows. To skip running this plugin on specific platforms use values from `sys.platform` in the configuration option `skip-platforms`, e.g.:
+
+```toml
+[tool.hatch.build.hooks.argparse-manpage]
+skip-platforms = ["win32", "cygwin"]
+```
+
 ### Compiling messages with msgfmt
 
 This plugin requires `.mo` files be created; it also requires that the directory storing them is within the project's base directory, and is not equal to the project's base directory or the directory in which `po` files are sourced. The mo file directory is set using `locale-directory`, which is required.

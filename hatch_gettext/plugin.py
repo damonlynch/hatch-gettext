@@ -364,6 +364,11 @@ class GettextBuildHook(BuildHookInterface):
         if self.target_name not in ["wheel", "sdist"]:
             return
 
+        if (
+            skip_platforms := self.config.get("skip-platforms", [])
+        ) and sys.platform in skip_platforms:
+            return
+
         self.setup_console()
         self.console_output(
             "Building gettext translations", level=1, style=self._style_level_waiting

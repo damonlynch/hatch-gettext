@@ -1,5 +1,9 @@
 # Changelog for Hatch Gettext
 
+## 1.1.2 (2026-08-17)
+
+- Add skip-platforms configuration option.
+
 ## 1.1.1 (2026-02-19)
 
 - Don't crash when doing quiet hatch build.
