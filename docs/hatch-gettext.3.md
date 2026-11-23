@@ -2,7 +2,7 @@
 
 # NAME
 
-hatch-gettext
+hatch-gettext \- Hatch build hook plugin for GNU gettext
 
 # SYNOPSIS
 
@@ -131,4 +131,4 @@ Damon Lynch <damonlynch@gmail.com>
 
 # COPYRIGHT
 
-Copyright 2024 Damon Lynch.
+Copyright 2024-2026 Damon Lynch.
