@@ -1,5 +1,13 @@
 # Changelog for Hatch Gettext
 
+## 1.1.3 (2026-11-23)
+
+- Change Python compatibility to >=3.11, from >=3.10.
+- Don't fail a build when the project path contains a space.
+- Report the error output of a failing gettext utility.
+- Add tests for supported versions of Python.
+- Make code base compliant with `hatch check`.
+
 ## 1.1.2 (2026-08-17)
 
 - Add skip-platforms configuration option.
