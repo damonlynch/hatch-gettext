@@ -1,17 +1,19 @@
 #  SPDX-FileCopyrightText: 2024-2026 Damon Lynch <damonlynch@gmail.com>
 #  SPDX-License-Identifier: GPL-3.0-or-later
 
-import functools
 import os
-import shlex
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 from rich.console import Console
+
+
+class GettextError(Exception):
+    """Raised when a GNU gettext utility invoked by the plug-in fails."""
 
 
 class GettextBuildHook(BuildHookInterface):
@@ -26,19 +28,28 @@ class GettextBuildHook(BuildHookInterface):
 
     PLUGIN_NAME = "gettext"
 
-    GETTEXT_SWITCHES = {
+    GETTEXT_SWITCHES: ClassVar[dict[str, str]] = {
         ".xml": "-x",
         ".desktop": "-d",
     }
+
+    _po_mo_pairs: list[tuple[Path, str]] | None = None
+    _translated_file_pairs: list[tuple[Path, str]] | None = None
 
     def config_name(self) -> str:
         return f"[tool.hatch.build.hooks.{self.PLUGIN_NAME}]"
 
     @staticmethod
-    def _assemble_command(cmd: str) -> list[str] | str:
-        if sys.platform == "win32":
-            return cmd
-        return shlex.split(cmd)
+    def _failure_output(process: subprocess.CompletedProcess[str]) -> str:
+        """
+        The gettext utilities write their diagnostics to stderr, but some intltool
+        messages only appear on stdout, so prefer stderr and fall back on stdout.
+
+        :param process: the completed subprocess
+        :return: whatever the utility reported
+        """
+
+        return (process.stderr or process.stdout or "").strip()
 
     def _compile_po_to_mo(self, po_file: Path, mo_file: Path) -> None:
         """
@@ -48,10 +59,11 @@ class GettextBuildHook(BuildHookInterface):
         :param mo_file: the full path to the mo file
         """
 
-        cmd = self._assemble_command(f"msgfmt --output-file={mo_file} {po_file}")
-        process = subprocess.run(cmd, text=True, capture_output=True)
+        cmd = ["msgfmt", f"--output-file={mo_file}", str(po_file)]
+        process = subprocess.run(cmd, check=False, text=True, capture_output=True)
         if process.returncode:
-            raise Exception(f"Error while invoking msgfmt:\n{process.stdout}")
+            message = f"Error while invoking msgfmt:\n{self._failure_output(process)}"
+            raise GettextError(message)
 
     def _translate_file(
         self, po_dir: Path, in_file: Path, translated_file: Path
@@ -66,12 +78,19 @@ class GettextBuildHook(BuildHookInterface):
 
         file_extension = in_file.suffixes[-2]
         switch = self.GETTEXT_SWITCHES[file_extension]
-        cmd = self._assemble_command(
-            f"intltool-merge {switch} {po_dir} {in_file} {translated_file}"
-        )
-        process = subprocess.run(cmd, text=True, capture_output=True)
+        cmd = [
+            "intltool-merge",
+            switch,
+            str(po_dir),
+            str(in_file),
+            str(translated_file),
+        ]
+        process = subprocess.run(cmd, check=False, text=True, capture_output=True)
         if process.returncode:
-            raise Exception(f"Error while invoking intltool-merge:\n{process.stdout}")
+            message = (
+                f"Error while invoking intltool-merge:\n{self._failure_output(process)}"
+            )
+            raise GettextError(message)
 
     def _clean_files(self, relative_file_paths: list[str]) -> None:
         project_root: Path = Path(self.root)
@@ -115,7 +134,7 @@ class GettextBuildHook(BuildHookInterface):
             )
             shutil.rmtree(folder)
 
-    def clean(self, versions: list[str]) -> None:
+    def clean(self, versions: list[str]) -> None:  # noqa: ARG002
         """
         Remove all files created by this plug-in, if they exist.
 
@@ -167,36 +186,35 @@ class GettextBuildHook(BuildHookInterface):
 
         self._po_dir = project_root / (self.config.get("po-directory", "po"))
         if not self._po_dir.is_dir():
-            raise ValueError(
+            message = (
                 f'Configure "po-directory" in "{self.config_name()}" in pyproject.toml '
                 'to the project\'s po directory [default: "po"], and ensure the '
                 "directory exists."
             )
-        try:
-            self._locale_dir = project_root / self.config["locale-directory"]
-        except KeyError:
-            raise ValueError(
+            raise ValueError(message)
+
+        locale_directory = self.config.get("locale-directory")
+        if not locale_directory:
+            message = (
                 f'Configure "locale-directory" in "{self.config_name()}" in '
                 "pyproject.toml to the directory in which compiled mo files will be "
                 "written to."
             )
-        try:
-            assert self._locale_dir != project_root
-        except AssertionError:
-            raise ValueError(
+            raise ValueError(message)
+
+        self._locale_dir = project_root / locale_directory
+        if self._locale_dir == project_root:
+            message = (
                 "The locale directory must be different from the project's root "
                 "directory."
             )
-        try:
-            assert self._po_dir != self._locale_dir
-        except AssertionError:
-            raise ValueError(
-                "The locale directory must be different from the po directory."
-            )
+            raise ValueError(message)
+        if self._po_dir == self._locale_dir:
+            message = "The locale directory must be different from the po directory."
+            raise ValueError(message)
 
         self._gtb_files = self.config.get("files")
 
-    @functools.cache
     def po_mo_pairs(self) -> list[tuple[Path, str]]:
         """
         :return: a list of tuples containing po files, and their corresponding mo
@@ -208,6 +226,9 @@ class GettextBuildHook(BuildHookInterface):
          If a LINGUAS file is found in the po directory or as an environment variable,
          only specified po files will be included.
         """
+
+        if self._po_mo_pairs is not None:
+            return self._po_mo_pairs
 
         filter_languages: list[str] = []
         linguas_file = self._po_dir / "LINGUAS"
@@ -224,7 +245,7 @@ class GettextBuildHook(BuildHookInterface):
         po_files = list(po_files)
         po_files.sort()
 
-        return [
+        pairs = [
             (
                 Path(po_file),
                 str(
@@ -236,8 +257,9 @@ class GettextBuildHook(BuildHookInterface):
             )
             for po_file in po_files
         ]
+        self._po_mo_pairs = pairs
+        return pairs
 
-    @functools.cache
     def translate_file_pairs(self) -> list[tuple[Path, str]]:
         """
         :return: a list of tuples containing .in files, and their corresponding
@@ -247,16 +269,19 @@ class GettextBuildHook(BuildHookInterface):
          string whose path is relative to the project root.
         """
 
-        if self._gtb_files is None:
-            return []
+        if self._translated_file_pairs is not None:
+            return self._translated_file_pairs
 
-        project_root: Path = Path(self.root)
-        files_to_build = []
-        for folder, files in self._gtb_files.items():
-            for in_file in files:
-                translated_file = Path(folder) / Path(in_file).stem
-                files_to_build.append((project_root / in_file, str(translated_file)))
-        return files_to_build
+        pairs: list[tuple[Path, str]] = []
+        if self._gtb_files is not None:
+            project_root: Path = Path(self.root)
+            for folder, files in self._gtb_files.items():
+                for in_file in files:
+                    translated_file = Path(folder) / Path(in_file).stem
+                    pairs.append((project_root / in_file, str(translated_file)))
+
+        self._translated_file_pairs = pairs
+        return pairs
 
     @property
     def mo_files_to_build(self) -> list[str]:
@@ -302,9 +327,10 @@ class GettextBuildHook(BuildHookInterface):
             self._translate_file(self._po_dir, in_file, path_to_translate)
 
     def identify_left_out(self) -> None:
-        cmd = self._assemble_command("intltool-update -m")
+        cmd = ["intltool-update", "-m"]
         p = subprocess.run(
             cmd,
+            check=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -312,17 +338,18 @@ class GettextBuildHook(BuildHookInterface):
         )
         if p.stdout:
             self.console_output(p.stdout, level=0, style=self._style_level_error)
-            raise ValueError("Files missing from translation template")
+            message = "Files missing from translation template"
+            raise ValueError(message)
 
     def regenerate_template(self) -> None:
-        cmd = self._assemble_command(f"intltool-update -p -g {self._i18n_name}")
+        cmd = ["intltool-update", "-p", "-g", self._i18n_name]
         self.console_output(
             "Regenerating .pot template", level=2, style=self._style_level_debug
         )
         subprocess.run(cmd, check=True, cwd=self._po_dir)
 
     def show_report(self) -> None:
-        cmd = self._assemble_command(f"intltool-update -r -g {self._i18n_name}")
+        cmd = ["intltool-update", "-r", "-g", self._i18n_name]
         self.console_output("Generating report", level=2, style=self._style_level_debug)
         subprocess.run(cmd, check=True, cwd=self._po_dir)
 
@@ -360,7 +387,11 @@ class GettextBuildHook(BuildHookInterface):
             return
         self.console.print(message, style=style)
 
-    def initialize(self, version: str, build_data: dict[str, Any]) -> None:
+    def initialize(
+        self,
+        version: str,  # noqa: ARG002
+        build_data: dict[str, Any],
+    ) -> None:
         if self.target_name not in ["wheel", "sdist"]:
             return
 
