@@ -49,7 +49,7 @@ class GettextBuildHook(BuildHookInterface):
         :return: whatever the utility reported
         """
 
-        return (process.stderr or process.stdout or "").strip()
+        return (process.stderr or "").strip() or (process.stdout or "").strip()
 
     def _compile_po_to_mo(self, po_file: Path, mo_file: Path) -> None:
         """

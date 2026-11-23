@@ -47,9 +47,32 @@ gettext = "hatch_gettext.hooks"
 [tool.hatch.version]
 path = "hatch_gettext/__about__.py"
 
+# `hatch test` only ever uses the built-in `hatch-test` environment template,
+# so the matrix must be declared there rather than on a custom env.
+# The project-level `matrix` replaces the template's Python-only matrix, and
+# a variable named `python`/`py` selects the interpreter automatically.
+# There is no second dimension: the gettext utilities are external programs,
+# not packages, so the tests skip themselves where they are absent rather than
+# being pinned to a dependency version.
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.11", "3.12", "3.13", "3.14", "3.15"]
+
 [tool.ruff]
 target-version = "py311"
 line-length = 88
+
+[tool.ruff.lint.per-file-ignores]
+# NOTE: defining this section replaces Hatch's built-in defaults, so the
+# stock rules for tests are repeated here, plus SLF001 since tests exercise
+# the build hook's private members
+"**/tests/**/*" = [
+  "PLC1901",
+  "PLR2004",
+  "PLR6301",
+  "S",
+  "SLF001",
+  "TID252",
+]
 
 [tool.pyrefly]
 project-includes = ["hatch_gettext"]
