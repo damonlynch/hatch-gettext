@@ -1,5 +1,9 @@
 # Changelog for Hatch Gettext
 
+## 1.1.4 (2026-11-24)
+
+- Correct manpage name
+
 ## 1.1.3 (2026-11-23)
 
 - Change Python compatibility to >=3.11, from >=3.10.
