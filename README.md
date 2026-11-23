@@ -20,12 +20,14 @@ This provides a [build hook](https://hatch.pypa.io/latest/config/build/#build-ho
 * [Hatch Gettext](#hatch-gettext)
   * [Configuration](#configuration)
     * [Calling the plugin](#calling-the-plugin)
+    * [Skipping Platforms](#skipping-platforms)
     * [Compiling messages with msgfmt](#compiling-messages-with-msgfmt)
     * [Identifying left out files using intltool-update](#identifying-left-out-files-using-intltool-update)
     * [Regenerating the .pot template using intltool-update](#regenerating-the-pot-template-using-intltool-update)
     * [Displaying a status report using intltool-update](#displaying-a-status-report-using-intltool-update)
     * [Translating files using intltool-merge](#translating-files-using-intltool-merge)
   * [Cleaning output files](#cleaning-output-files)
+  * [Running tests](#running-tests)
   * [Related Hatch plugin](#related-hatch-plugin)
   * [License](#license)
 <!-- TOC -->
@@ -119,6 +121,14 @@ This plugin allows for but does not mandate translating `.xml` and `.desktop` fi
 ## Cleaning output files
 
 The plugin includes logic to remove the files it outputs using hatch's `clean` hook. As well as individual files, any output directories created will also be removed, as long as these directories do not contain files created by something other than this plugin.
+
+## Running tests
+
+To run the full test suite for all supported Python versions, run:
+
+```
+hatch test -a
+```
 
 ## Related Hatch plugin
 
